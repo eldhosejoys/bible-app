@@ -8,6 +8,7 @@ function Content() {
   const location = useLocation();
   const [cards, setCards] = useState([]);
   const [title, setTitle] = useState([]);
+  const [navigation, setNavigation] = useState([]);
   const itemsRef = useRef([]); const itemsRef2 = useRef([]); const itemsRef3 = useRef([]);
   const [chapter, setChapter] = useState();
 
@@ -100,10 +101,29 @@ function Content() {
                   return td;
                 })()}
               </div>
-
             </div>
-
           );
+
+          setNavigation(
+                 <div className="row row-2 justify-content-center mt-4">
+                  {(() => {
+                        var td = [];
+                        if (params.chapter>1 && params.chapter <= r[0].c) {
+                          td.push(
+                            <div className="col-auto mr-auto "><Link to={`/verse/${params.book}/${parseInt(params.chapter)-1}`} ><div className="arrowbutton"><a  className="btn rounded-circle arrowbutton"><img className="" src="/assets/images/arrow-left.svg" alt="" /></a></div></Link></div>
+                        
+                          );
+                        }
+                        if (params.chapter < r[0].c && params.chapter >= 1) {
+                          td.push(
+                            <div className="col-auto "><Link to={`/verse/${params.book}/${parseInt(params.chapter)+1}`}><div className="arrowbutton"><a className="btn rounded-circle arrowbutton"><img className="" src="/assets/images/arrow-right.svg" alt="" /></a></div> </Link> </div>                       
+                          );
+                        }
+                        return td;
+                      })()}
+                 </div>
+          );
+
 
         })
         .catch(function (error) {
@@ -148,6 +168,7 @@ function Content() {
               </div>
             );
           });
+          b.push(navigation);
           setCards(b);
           if (params.verse && b.length >= params.verse) {
             console.log("inside");
@@ -172,7 +193,6 @@ function Content() {
                 <div className="row row-cols-1 justify-content-center">
                   <div className="text-center mb-2">{title}</div>
                   {cards}
-
                 </div>
               </div>
             </section>
