@@ -151,8 +151,9 @@ function Content() {
           setCards(b);
           if (params.verse && b.length >= params.verse) {
             console.log("inside");
+
           }
-         
+
         })
         .catch(function (error) {
           console.log(error);
