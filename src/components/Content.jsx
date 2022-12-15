@@ -8,7 +8,7 @@ function Content() {
   const location = useLocation();
   const [cards, setCards] = useState([]);
   const [title, setTitle] = useState([]);
-  const itemsRef = useRef([]);
+  const itemsRef = useRef([]); const itemsRef2 = useRef([]); const itemsRef3 = useRef([]);
   const [chapter, setChapter] = useState();
 
   async function speak(index) {
@@ -25,7 +25,6 @@ function Content() {
 
     }
     for (var i = 0; i < sentences.length; i++) {
-      console.log(itemsRef.current[i].src)
       getNextAudio(sentences[i], i);
     }
 
@@ -37,10 +36,19 @@ function Content() {
       let mestext = '';
       audio.onstart = (event) => {
         itemsRef.current[index + sentences.indexOf(event.utterance.text)].src = '/assets/images/stop.svg';
+        itemsRef2.current[index + sentences.indexOf(event.utterance.text)].style.backgroundColor = '#ffb380';
+        itemsRef3.current[index + sentences.indexOf(event.utterance.text)].style.backgroundColor = '#faebd7';
+        itemsRef2.current[index + sentences.indexOf(event.utterance.text)].scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+          inline: 'center'
+      });
         mestext = event.utterance.text;
       }
       audio.onend = (event) => {
         itemsRef.current[index + sentences.indexOf(mestext)].src = '/assets/images/play.svg';
+        itemsRef2.current[index + sentences.indexOf(mestext)].style.backgroundColor = '';
+        itemsRef3.current[index + sentences.indexOf(mestext)].style.backgroundColor = '';
       }
 
       // return new Promise(resolve => {
@@ -119,7 +127,7 @@ function Content() {
             b.push(
               <div className="col mb-2 pushdata" id={`v-${response["v"]}`}>
                 <div className="shadow-sm card ">
-                  <div className="card-body col-12">
+                  <div className="card-body col-12" ref={el => itemsRef3.current[index] = el}>
                     <div className="row row-col-3 g-2">
                       <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div>
                       <div className="col text-left">{response["t"]}</div>
@@ -127,7 +135,7 @@ function Content() {
                         var td = [];
                         if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
                           td.push(
-                            <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a onClick={e => speak(index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
+                            <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
                             </div>
                           );
                         }
@@ -143,9 +151,8 @@ function Content() {
           setCards(b);
           if (params.verse && b.length >= params.verse) {
             console.log("inside");
-
           }
-
+         
         })
         .catch(function (error) {
           console.log(error);
