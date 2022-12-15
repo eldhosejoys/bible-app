@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, React } from "react";
 import axios from "axios";
 
 
-function Content() {
+function Search() {
   let params = useParams();
   const location = useLocation();
   const [cards, setCards] = useState([]);
@@ -31,7 +31,7 @@ function Content() {
           });
           
           setTitle(
-            <div><div><h3 className=""><span className="text-primary fw-bold"><Link className="text-decoration-none" to={`/verse/${r[0].n}/1`} >{r[0].bm}</Link></span> - അദ്ധ്യായം {params.chapter}</h3></div>
+            <div><div><h3 className=""><span className="text-primary fw-bold">{r[0].bm}</span> - അദ്ധ്യായം {params.chapter}</h3></div>
             <div className="row row-cols-auto mt-3 justify-content-center">
             {(() => {
             let td = [];
@@ -118,4 +118,4 @@ function Content() {
   );
 }
 
-export default Content;
+export default Search;

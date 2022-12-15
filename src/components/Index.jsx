@@ -1,12 +1,21 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
 function Index() {
   const [cards, setCards] = useState([]);
+  const itemsRef = useRef([]);
 
-  
+function collapse(a){
+console.log(itemsRef.current[a].style.display);
 
+if(itemsRef.current[a].style.display == 'none'){
+  itemsRef.current[a].style.display = '';
+}else{
+  itemsRef.current[a].style.display = 'none';
+}
+
+}
   useEffect(() => {
 
     setCards(
@@ -25,14 +34,14 @@ function Index() {
           response.data.forEach((response) => {
 
             b.push(
-              <div className="col mb-3 justify-content-center">
-                <div className="shadow-sm card flex-row flex-wrap hover-effect">
+              <div className="col mb-1 justify-content-center">
+                <div className="shadow-sm card flex-row flex-wrap hover-effect mb-3">
                   <div className="card-body col-12 col-sm-9 text-center">
-                    <h5 className="card-title text-center text-primary fw-bolder">{response["bm"]}</h5>
+                    <h5 className="card-title text-center text-primary fw-bolder"><Link className="text-decoration-none" to={`/verse/${response["n"]}/1`} >{response["bm"]}</Link></h5>
                     <div className="small fw-bold"><img src="/assets/images/writer.png" alt="ഗ്രന്ഥകാരൻ" height="28px" /> {response["w"]}</div>
                     <div className="small fst-italic mt-2"><img src="/assets/images/date.png" alt="എഴുതിയ കാലഘട്ടം" height="28px" /> {response["d"]}</div>
-
-                    <div className="row row-cols-auto mt-3 justify-content-center">
+                    
+                    <div style={{"display":"none"}} key={response["n"]} ref={el => itemsRef.current[response["n"]] = el} className="row row-cols-auto mt-3 justify-content-center">
 
                       {(() => {
                         let td = [];
@@ -44,6 +53,8 @@ function Index() {
                         return td;
                       })()}
                     </div>
+                    <div style={{"position":"relative","margin-bottom":"-35px"}} className="mt-3"><a onClick={() =>collapse(`${response["n"]}`)} className="btn rounded-circle fw-bold" style={{"background-color": "#eee"}}>⇣⇡</a></div>
+
                   </div>
                 </div>
               </div>
@@ -62,7 +73,6 @@ function Index() {
 
   return (<>
 
-
     <section className="py-2 mb-5">
       <div className="container-fluid">
         <div className="row">
@@ -70,9 +80,9 @@ function Index() {
 
             <section id="scroll-target">
               <div className="container-fluid my-2">
-                <div className="row">
+                <div className="row ">
                   <div className="container-fluid mt-3">
-                    <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 justify-content-center">
+                    <div className="row g-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 justify-content-center">
                       {cards}
                     </div>
                   </div>
