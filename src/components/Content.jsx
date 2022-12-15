@@ -8,46 +8,51 @@ function Content() {
   const location = useLocation();
   const [cards, setCards] = useState([]);
   const [title, setTitle] = useState([]);
+  const itemsRef = useRef([]);
   const [chapter, setChapter] = useState();
 
-  async function speak(a, index) {
-
+  async function speak(index) {
     window.speechSynthesis.cancel();
-    let sentences =[];
-    for(var i = index; i< JSON.parse(chapter).length ; i++){
+
+    if (itemsRef.current[index].src.indexOf("stop.svg") != -1) { // contains play
+      itemsRef.current[index].src = '/assets/images/play.svg';
+      return;
+    }
+
+    let sentences = [];
+    for (var i = index; i < JSON.parse(chapter).length; i++) {
       sentences.push(JSON.parse(chapter)[i].t);
+
     }
     for (var i = 0; i < sentences.length; i++) {
-       getNextAudio(sentences[i]);
+      console.log(itemsRef.current[i].src)
+      getNextAudio(sentences[i], i);
     }
 
-    async function getNextAudio(sentence) {
-      console.log(sentence);
+    async function getNextAudio(sentence, i) {
+
       let audio = new SpeechSynthesisUtterance(sentence);
       audio.lang = "ml";
       window.speechSynthesis.speak(audio);
+      let mestext = '';
+      audio.onstart = (event) => {
+        itemsRef.current[index + sentences.indexOf(event.utterance.text)].src = '/assets/images/stop.svg';
+        mestext = event.utterance.text;
+      }
+      audio.onend = (event) => {
+        itemsRef.current[index + sentences.indexOf(mestext)].src = '/assets/images/play.svg';
+      }
 
-      return new Promise(resolve => {
-        audio.onend = resolve;
-      });
-    } 
+      // return new Promise(resolve => {
+      //   audio.onend = resolve;
 
+      // });
+    }
 
-    
-    // for(var i = index; i<= JSON.parse(chapter).length ; i++){
-    //   console.log(JSON.parse(chapter)[i].t);
-    //   var synth = window.speechSynthesis;
-    //   synth.cancel();
-    //   var utterThis = new SpeechSynthesisUtterance(a);
-    //   utterThis.lang = "ml";
-    //   synth.speak(utterThis);
-    // }
-  
-    
-    
   }
 
   useEffect(() => {
+    window.speechSynthesis.cancel();
     setCards(
       <div class="spinner-grow text-center" role="status">
         <span class="visually-hidden">Loading...</span>
@@ -56,7 +61,7 @@ function Content() {
 
     let url = "/assets/json/bible.json"; let url2 = "/assets/json/title.json";
     let b = [];
-    
+
     (async () => {
       await axios
         .get(url2)
@@ -72,9 +77,17 @@ function Content() {
                 {(() => {
                   let td = [];
                   for (let i = 1; i <= r[0].c; i++) {
-                    td.push(
-                      <div key={i} className="numberbox"><Link className="link-dark small text-decoration-none" to={`/verse/${params.book}/${i}`} ><div className="col numberbox">{i}</div></Link> </div>
-                    );
+                    if (i == params.chapter) {
+                      console.log(i)
+                      td.push(
+                        <div key={i} className="numberbox" ><Link className="link-dark small text-decoration-none" to={`/verse/${params.book}/${i}`} ><div className="col numberbox" style={{ "background-color": "#8D9EFF" }}>{i}</div></Link> </div>
+                      );
+                    }
+                    else {
+                      td.push(
+                        <div key={i} className="numberbox"><Link className="link-dark small text-decoration-none" to={`/verse/${params.book}/${i}`} ><div className="col numberbox">{i}</div></Link> </div>
+                      );
+                    }
                   }
                   return td;
                 })()}
@@ -102,7 +115,7 @@ function Content() {
 
           b = []; // clearing array first
           setChapter(JSON.stringify(r));
-          r.forEach((response,index) => {
+          r.forEach((response, index) => {
             b.push(
               <div className="col mb-2 pushdata" id={`v-${response["v"]}`}>
                 <div className="shadow-sm card ">
@@ -110,8 +123,17 @@ function Content() {
                     <div className="row row-col-3 g-2">
                       <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div>
                       <div className="col text-left">{response["t"]}</div>
-                      <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a onClick={e => speak(response["t"],index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img src="/assets/images/play.svg"/></a></div>
-                      </div>
+                      {(() => {
+                        var td = [];
+                        if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                          td.push(
+                            <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a onClick={e => speak(index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
+                            </div>
+                          );
+                        }
+                        return td;
+                      })()}
+
                     </div>
                   </div>
                 </div>
@@ -131,7 +153,7 @@ function Content() {
         .then(function () { });
     })();
 
-  }, [location,chapter]);
+  }, [location, chapter]);
   return (
     <section className="py-2 mb-5">
       <div className="container">

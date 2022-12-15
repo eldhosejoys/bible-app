@@ -3,6 +3,7 @@ import { useEffect } from "react";
 function Error() {
 
     useEffect(()=>{
+        window.speechSynthesis.cancel();
         console.log("not found");
     },[]);
 

@@ -15,7 +15,7 @@ function Index() {
 
   }
   useEffect(() => {
-
+    window.speechSynthesis.cancel();
     setCards(
       <div className="spinner-grow text-center" role="status">
         <span className="visually-hidden">Loading...</span>

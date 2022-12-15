@@ -11,6 +11,7 @@ function Search() {
   
 
   useEffect(() => {
+    window.speechSynthesis.cancel();
     setCards(
 
       <div class="spinner-grow text-center" role="status">
