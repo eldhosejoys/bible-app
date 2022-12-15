@@ -53,7 +53,7 @@ if(itemsRef.current[a].style.display == 'none'){
                         return td;
                       })()}
                     </div>
-                    <div style={{"position":"relative","margin-bottom":"-35px"}} className="mt-3"><a onClick={() =>collapse(`${response["n"]}`)} className="btn rounded-circle fw-bold" style={{"background-color": "#eee"}}>⇣⇡</a></div>
+                    <div style={{"position":"relative","margin-bottom":"-35px"}} className="mt-3 arrowbutton"><a onClick={() =>collapse(`${response["n"]}`)} className="btn rounded-circle fw-bold arrowbutton">⇣⇡</a></div>
 
                   </div>
                 </div>

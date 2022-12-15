@@ -11096,6 +11096,13 @@ html {
     background-color: #8D9EFF
 }
 
+.arrowbutton a {
+    background-color: #eee
+}
+.arrowbutton a:hover{
+    background-color: #8D9EFF
+}
+
 div.scrollmenu {
     background-color: #212529;
     overflow: auto;
