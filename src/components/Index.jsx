@@ -6,21 +6,19 @@ function Index() {
   const [cards, setCards] = useState([]);
   const itemsRef = useRef([]);
 
-function collapse(a){
-console.log(itemsRef.current[a].style.display);
+  function collapse(a) {
+    if (itemsRef.current[a].style.display == 'none') {
+      itemsRef.current[a].style.display = '';
+    } else {
+      itemsRef.current[a].style.display = 'none';
+    }
 
-if(itemsRef.current[a].style.display == 'none'){
-  itemsRef.current[a].style.display = '';
-}else{
-  itemsRef.current[a].style.display = 'none';
-}
-
-}
+  }
   useEffect(() => {
 
     setCards(
-      <div class="spinner-grow text-center" role="status">
-        <span class="visually-hidden">Loading...</span>
+      <div className="spinner-grow text-center" role="status">
+        <span className="visually-hidden">Loading...</span>
       </div>
     );
 
@@ -40,8 +38,8 @@ if(itemsRef.current[a].style.display == 'none'){
                     <h5 className="card-title text-center text-primary fw-bolder"><Link className="text-decoration-none" to={`/verse/${response["n"]}/1`} >{response["bm"]}</Link></h5>
                     <div className="small fw-bold"><img src="/assets/images/writer.png" alt="ഗ്രന്ഥകാരൻ" height="28px" /> {response["w"]}</div>
                     <div className="small fst-italic mt-2"><img src="/assets/images/date.png" alt="എഴുതിയ കാലഘട്ടം" height="28px" /> {response["d"]}</div>
-                    
-                    <div style={{"display":"none"}} key={response["n"]} ref={el => itemsRef.current[response["n"]] = el} className="row row-cols-auto mt-3 justify-content-center">
+
+                    <div style={{ "display": "none" }} key={response["n"]} ref={el => itemsRef.current[response["n"]] = el} className="row row-cols-auto mt-3 justify-content-center">
 
                       {(() => {
                         let td = [];
@@ -53,7 +51,7 @@ if(itemsRef.current[a].style.display == 'none'){
                         return td;
                       })()}
                     </div>
-                    <div style={{"position":"relative","margin-bottom":"-35px"}} className="mt-3 arrowbutton"><a onClick={() =>collapse(`${response["n"]}`)} className="btn rounded-circle fw-bold arrowbutton">⇣⇡</a></div>
+                    <div style={{ "position": "relative", "margin-bottom": "-35px" }} className="mt-3 arrowbutton"><a onClick={() => collapse(`${response["n"]}`)} className="btn rounded-circle fw-bold arrowbutton">⇣⇡</a></div>
 
                   </div>
                 </div>
@@ -70,9 +68,7 @@ if(itemsRef.current[a].style.display == 'none'){
 
   }, []);
 
-
   return (<>
-
     <section className="py-2 mb-5">
       <div className="container-fluid">
         <div className="row">

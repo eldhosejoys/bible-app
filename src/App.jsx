@@ -5,6 +5,7 @@ import Header from './include/Header';
 import Error from './components/Error';
 import Content from './components/Content';
 import Footer from './include/Footer';
+import Search from './components/Search';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
                 <Routes>
                     <Route path='*' element={<Error />} status={404} />
                     <Route path='/' element={<Index />} />
+                    <Route path='/search' element={<Search />} />
                     <Route path='/verse/:book/:chapter' element={<Content />} />
                     <Route path='/verse/:book/:chapter/:verse' element={<Content />} />
                 </Routes>
