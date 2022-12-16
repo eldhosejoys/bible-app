@@ -107,6 +107,9 @@ function Search() {
       var m = titlecontents.data.filter(function (obj) {
         return (obj.n == response["b"]);
       });
+
+      var splited = response["t"].replace(q, "<span style='background-color: #fff952;'>"+q+"</span>");
+      console.log(splited);
       
       b.push(
         <div className="col mb-2 pushdata" id={`v-${response["v"]}`}>
@@ -115,7 +118,7 @@ function Search() {
             
               <div className="row row-col-2 g-2">
               {/* <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div> */}
-                <div className="col text-left">{response["t"]}<Link className="link-dark small text-decoration-none" to={`/verse/${response["b"]}/${response["c"]}/${response["v"]}`}><div className="fw-bold text-primary">({m[0].bm} {response["c"]}:{response["v"]})</div></Link> </div>
+                <div className="col text-left" ><div dangerouslySetInnerHTML={{__html: splited}} /><Link className="link-dark small text-decoration-none" to={`/verse/${response["b"]}/${response["c"]}/${response["v"]}`}><div className="fw-bold text-primary">({m[0].bm} {response["c"]}:{response["v"]})</div></Link> </div>
                 {(() => {
                   var td = [];
                   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
@@ -166,7 +169,6 @@ function Search() {
       }
     };
     titlenavi();
-
 
     const biblecontents = async () => {
 
