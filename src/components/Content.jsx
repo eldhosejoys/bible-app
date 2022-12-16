@@ -10,10 +10,33 @@ function Content() {
   const [navigation, setNavigation] = useState([]);
   const itemsRef = useRef([]); const itemsRef2 = useRef([]); const itemsRef3 = useRef([]);
   const [chapter, setChapter] = useState();
+  // const [verse, setVerse] = useState(0);
 
   let url = "/assets/json/bible.json"; let url2 = "/assets/json/title.json";
   let b = [];
 
+  let loadedCard = (e) =>{
+    console.log("e: "+e)
+    // setVerse(verse+1);
+    if(params.verse && params.verse == parseInt(e)+1){
+      console.log("verse: "+params.verse)
+      itemsRef3.current[parseInt(params.verse)-1].scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'center'
+      }) ;
+      itemsRef2.current[parseInt(params.verse)-1].style.backgroundColor = '#ffb380';
+      itemsRef3.current[parseInt(params.verse)-1].style.backgroundColor = '#faebd7';
+      setTimeout(
+        () => {
+      itemsRef2.current[parseInt(params.verse)-1].style.backgroundColor = '';
+      itemsRef3.current[parseInt(params.verse)-1].style.backgroundColor = '';
+        }, 
+        3000
+      );
+
+    }
+  }
 
   async function speak(chap,index) {
     window.speechSynthesis.cancel();
@@ -94,14 +117,11 @@ function Content() {
           var tp = [];
           
           if (params.chapter > 1 && params.chapter <= r[0].c) {
-            console.log("params2: "+parseInt(params.chapter))
             tp.push(
               <div className="col-auto mr-auto "><Link to={`/verse/${params.book}/${parseInt(params.chapter) - 1}`} ><div className="arrowbutton"><a className="btn rounded-circle arrowbutton"><img className="" src="/assets/images/arrow-left.svg" alt="" /></a></div></Link></div>
-
             );
           }
           if (params.chapter < r[0].c && params.chapter >= 1) {
-            console.log("params3: "+parseInt(params.chapter))
             tp.push(
               <div className="col-auto "><Link to={`/verse/${params.book}/${parseInt(params.chapter) + 1}`}><div className="arrowbutton"><a className="btn rounded-circle arrowbutton"><img className="" src="/assets/images/arrow-right.svg" alt="" /></a></div> </Link> </div>
             );
@@ -154,7 +174,7 @@ function Content() {
                   var td = [];
                   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
                     td.push(
-                      <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap,index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
+                      <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap,index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img onLoad={(e) => {if(parseInt(params.verse) == index+1){loadedCard(index);}}} ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
                       </div>
                     );
                   }
@@ -172,11 +192,10 @@ function Content() {
       console.log("inside");
 
     }
+    
   }
 
   useEffect(() => {
-    setChapter(params.chapter);
-    console.log("chapter: "+chapter);
     window.speechSynthesis.cancel();
     setCards(
       <div class="spinner-grow text-center" role="status">
@@ -221,13 +240,16 @@ function Content() {
             .catch(function (error) {
               console.log(error);
             })
-            .then(function () { });
+            .then(function () { 
+              
+            });
         })();
       }
     };
     biblecontents();
-      
-  }, [params.chapter]);
+  }, [location]);
+
+
   return (
     <section className="py-2 mb-5">
       <div className="container">
@@ -242,8 +264,6 @@ function Content() {
                 </div>
               </div>
             </section>
-
-
           </div>
         </div>
       </div>

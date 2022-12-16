@@ -175,15 +175,12 @@ function Content() {
   }
 
   useEffect(() => {
-    setChapter(params.chapter);
-    console.log("chapter: "+chapter);
     window.speechSynthesis.cancel();
     setCards(
       <div class="spinner-grow text-center" role="status">
         <span class="visually-hidden">Loading...</span>
       </div>
     );
-
 
     const titlenavi = async () => {
       const a = await getCacheData('content', url2);
