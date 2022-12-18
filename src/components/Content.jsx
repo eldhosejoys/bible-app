@@ -1,6 +1,7 @@
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef, React } from "react";
 import axios from "axios";
+import Error from './Error';
 
 function Content() {
   let params = useParams();
@@ -8,12 +9,22 @@ function Content() {
   const [cards, setCards] = useState([]);
   const [title, setTitle] = useState([]);
   const [navigation, setNavigation] = useState([]);
+  const navigate = useNavigate();
   const itemsRef = useRef([]); const itemsRef2 = useRef([]); const itemsRef3 = useRef([]);
   const [chapter, setChapter] = useState();
+  const [chaptername, setChaptername] = useState();
+
   // const [verse, setVerse] = useState(0);
 
   let url = "/assets/json/bible.json"; let url2 = "/assets/json/title.json";
   let b = [];
+
+  if (parseInt(params.chapter) <= 0 ) {
+    navigate("/verse/"+params.book+"/1");
+  }
+  if(parseInt(params.book)>66){navigate("/verse/66/1");}
+  if(parseInt(params.book)<1){navigate("/verse/1/1");}
+  <Error/>
 
   let loadedCard = (e) =>{
     console.log("e: "+e)
@@ -37,6 +48,32 @@ function Content() {
 
     }
   }
+
+  const copyToClipBoard = async (copyMe,index)=> {
+    try {
+      await navigator.clipboard.writeText(copyMe+index+")");
+      itemsRef2.current["c-"+index].style.backgroundColor = '#90EE90';
+      itemsRef.current["c-"+index].src = '/assets/images/clipboard-check.svg';
+
+      setTimeout(
+        () => {
+          itemsRef.current["c-"+index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-"+index].style.backgroundColor = '';
+        }, 
+        3000
+      );
+    } catch (err) {
+      itemsRef2.current["c-"+index].style.backgroundColor = '#FFCCCB';
+      itemsRef.current["c-"+index].src = '/assets/images/clipboard-x.svg';
+      setTimeout(
+        () => {
+          itemsRef.current["c-"+index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-"+index].style.backgroundColor = '';
+        }, 
+        3000
+      );
+    }
+  };
 
   async function speak(chap,index) {
     window.speechSynthesis.cancel();
@@ -131,6 +168,9 @@ function Content() {
       </div>
     );
 
+    setChaptername(r[0].bm);
+    console.log(chaptername)
+
     setTitle(
       <div className="text-center mb-2"><div><h3 className=""><span className="text-primary fw-bold"><Link className="text-decoration-none" to={`/verse/${r[0].n}/1`} >{r[0].bm}</Link></span> - അദ്ധ്യായം {params.chapter}</h3></div>
         <div className="row row-cols-auto mt-3 justify-content-center">
@@ -168,19 +208,22 @@ function Content() {
           <div className="shadow-sm card ">
             <div className="card-body col-12" ref={el => itemsRef3.current[index] = el}>
               <div className="row row-col-3 g-2">
-                <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div>
+                <div className="col-auto"><span className="fw-bold"><Link className="text-decoration-none" to={`/verse/${params.book}/${params.chapter}/${response["v"]}`} >{response["v"]}.</Link></span></div>
                 <div className="col text-left">{response["t"]}</div>
+                <div className="col-auto text-right ml-auto my-auto">
                 {(() => {
                   var td = [];
                   if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
                     td.push(
-                      <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap,index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img onLoad={(e) => {if(parseInt(params.verse) == index+1){loadedCard(index);}}} ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
-                      </div>
+                      <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap,index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" width="16px" height="16px" /></a></div>                          
                     );
                   }
+                  td.push(
+                    <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current["c-"+index] = el} onClick={e => copyToClipBoard(response["t"]+" ("+chaptername+" "+params.chapter+":",index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img onLoad={(e) => {if(parseInt(params.verse) == index+1){loadedCard(index);}}} ref={el => itemsRef.current["c-"+index] = el} src="/assets/images/clipboard.svg" width="16px" height="16px"/></a></div>
+                                   );
                   return td;
                 })()}
-
+                </div>
               </div>
             </div>
           </div>
@@ -188,10 +231,6 @@ function Content() {
       );
     });
     setCards(b);
-    if (params.verse && b.length >= params.verse) {
-      console.log("inside");
-
-    }
     
   }
 
@@ -202,7 +241,6 @@ function Content() {
         <span class="visually-hidden">Loading...</span>
       </div>
     );
-
 
     const titlenavi = async () => {
       const a = await getCacheData('content', url2);
@@ -247,7 +285,7 @@ function Content() {
       }
     };
     biblecontents();
-  }, [location]);
+  }, [location,chaptername]);
 
 
   return (

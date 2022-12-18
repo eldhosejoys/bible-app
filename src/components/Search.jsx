@@ -16,10 +16,10 @@ function Search() {
   let b = [];
 
 
-  async function speak(chap,index) {
+  async function speak(chap, index) {
     window.speechSynthesis.cancel();
     if (itemsRef.current[index].src.indexOf("stop.svg") != -1) { // contains play
-        itemsRef.current[index].src = '/assets/images/play.svg';
+      itemsRef.current[index].src = '/assets/images/play.svg';
       return;
     }
     let sentences = [];
@@ -52,6 +52,32 @@ function Search() {
 
   }
 
+  const copyToClipBoard = async (copyMe, index) => {
+    try {
+      await navigator.clipboard.writeText(copyMe);
+      itemsRef2.current["c-" + index].style.backgroundColor = '#90EE90';
+      itemsRef.current["c-" + index].src = '/assets/images/clipboard-check.svg';
+
+      setTimeout(
+        () => {
+          itemsRef.current["c-" + index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-" + index].style.backgroundColor = '';
+        },
+        3000
+      );
+    } catch (err) {
+      itemsRef2.current["c-" + index].style.backgroundColor = '#FFCCCB';
+      itemsRef.current["c-" + index].src = '/assets/images/clipboard-x.svg';
+      setTimeout(
+        () => {
+          itemsRef.current["c-" + index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-" + index].style.backgroundColor = '';
+        },
+        3000
+      );
+    }
+  };
+
   // Function to add our give data into cache
   const addDataIntoCache = (cacheName, url, response) => {
     const data = new Response(JSON.stringify(response));
@@ -66,70 +92,76 @@ function Search() {
   const getCacheData = async (cacheName, url) => {
     const cacheStorage = await caches.open(cacheName);
     const cachedResponse = await cacheStorage.match(url); // Returns a promise w/ matched cache
-    if(!cachedResponse || !cachedResponse.ok) {return false}
+    if (!cachedResponse || !cachedResponse.ok) { return false }
     // console.log(await cachedResponse);
     // console.log(await cachedResponse.json()); // prints json object with value of key matched
     return await cachedResponse.json();
-};
+  };
 
- 
-  function biblecontent(response,q,titlecontents) {
+
+  function biblecontent(response, q, titlecontents) {
     var r = response.data.filter(function (obj) {
       return (obj.t.indexOf(q) >= 0);
     });
 
     b = []; // clearing array first
-    {(() => {
-      var td = [];
-      if(r.length <= 0){
-        td.push(
-          <div className="text-center fw-lighter mb-3 text-secondary">No results found</div>
-         );
-      }
-      else if(r.length <=500 ){
-        td.push(
-        <div className="text-center fw-lighter mb-3 text-secondary">{r.length} results found</div>
-       );
-      }
-       else{
-        td.push(
-          <div className="text-center fw-lighter mb-3 text-secondary">Showing the first 500 results of {r.length}</div>
-         );
-       }
-        
+    {
+      (() => {
+        var td = [];
+        if (r.length <= 0) {
+          td.push(
+            <div className="text-center fw-lighter mb-3 text-secondary">No results found</div>
+          );
+        }
+        else if (r.length <= 500) {
+          td.push(
+            <div className="text-center fw-lighter mb-3 text-secondary">{r.length} results found</div>
+          );
+        }
+        else {
+          td.push(
+            <div className="text-center fw-lighter mb-3 text-secondary">Showing the first 500 results of {r.length}</div>
+          );
+        }
+
         b.push(td)
-      return td;
-    })()}
+        return td;
+      })()
+    }
 
     r.forEach((response, index) => {
-      if(index >= 500){ return; }
+      if (index >= 500) { return; }
 
       var m = titlecontents.data.filter(function (obj) {
         return (obj.n == response["b"]);
       });
 
-      var splited = response["t"].replace(q, "<span style='background-color: #fff952;'>"+q+"</span>");
-      console.log(splited);
-      
+      var splited = response["t"].replace(q, "<span style='background-color: #fff952;'>" + q + "</span>");
+
       b.push(
         <div className="col mb-2 pushdata" id={`v-${response["v"]}`}>
           <div className="shadow-sm card ">
             <div className="card-body col-12" ref={el => itemsRef3.current[index] = el}>
-            
-              <div className="row row-col-2 g-2">
-              {/* <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div> */}
-                <div className="col text-left" ><div dangerouslySetInnerHTML={{__html: splited}} /><Link className="link-dark small text-decoration-none" to={`/verse/${response["b"]}/${response["c"]}/${response["v"]}`}><div className="fw-bold text-primary">({m[0].bm} {response["c"]}:{response["v"]})</div></Link> </div>
-                {(() => {
-                  var td = [];
-                  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-                    td.push(
-                      <div className="col-auto text-right ml-auto my-auto"><div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(response["t"],index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" /></a></div>
-                      </div>
-                    );
-                  }
-                  return td;
-                })()}
 
+              <div className="row row-col-2 g-2">
+                {/* <div className="col-auto"><span className="fw-bold">{response["v"]}.</span></div> */}
+                <div className="col text-left" ><div dangerouslySetInnerHTML={{ __html: splited }} /><Link className="link-dark small text-decoration-none" to={`/verse/${response["b"]}/${response["c"]}/${response["v"]}`}><div className="fw-bold text-primary">({m[0].bm} {response["c"]}:{response["v"]})</div></Link> </div>
+                <div className="col-auto text-right ml-auto my-auto">
+                  {(() => {
+                    var td = [];
+                    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                      td.push(
+                        <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(response["t"], index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" width="16px" height="16px" /></a></div>
+
+                      );
+                    }
+                    td.push(
+                      <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current["c-"+index] = el} onClick={e => copyToClipBoard(response["t"]+" ("+m[0].bm+" "+response["c"]+":"+response["v"]+")", index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current["c-"+index] = el} src="/assets/images/clipboard.svg" width="16px" height="16px"/></a></div>
+
+                    );
+                    return td;
+                  })()}
+                </div>
               </div>
             </div>
           </div>
@@ -151,9 +183,9 @@ function Search() {
     let titlecontents;
     const titlenavi = async () => {
       const a = await getCacheData('content', url2);
-      if(a){
-        titlecontents =a;
-      }else{
+      if (a) {
+        titlecontents = a;
+      } else {
         (async () => {
           await axios
             .get(url2)
@@ -173,15 +205,15 @@ function Search() {
     const biblecontents = async () => {
 
       const a = await getCacheData('content', url);
-      if(a){
-        biblecontent(a,searchParams.get("q"),titlecontents);
-      }else{
+      if (a) {
+        biblecontent(a, searchParams.get("q"), titlecontents);
+      } else {
         (async () => {
           await axios
             .get(url)
             .then(function (response) {
               addDataIntoCache('content', url, response);
-              biblecontent(response,searchParams.get("q"),titlecontents);
+              biblecontent(response, searchParams.get("q"), titlecontents);
             })
             .catch(function (error) {
               console.log(error);
@@ -191,7 +223,7 @@ function Search() {
       }
     };
     biblecontents();
-      
+
   }, [location]);
   return (
     <section className="py-2 mb-5">
