@@ -19,69 +19,78 @@ function Content() {
   let url = "/assets/json/bible.json"; let url2 = "/assets/json/title.json";
   let b = [];
 
-  if (parseInt(params.chapter) <= 0 ) {
-    navigate("/verse/"+params.book+"/1");
+  if (parseInt(params.chapter) <= 0) {
+    navigate("/verse/" + params.book + "/1");
   }
-  if(parseInt(params.book)>66){navigate("/verse/66/1");}
-  if(parseInt(params.book)<1){navigate("/verse/1/1");}
-  <Error/>
+  if (parseInt(params.book) > 66) { navigate("/verse/66/1"); }
+  if (parseInt(params.book) < 1) { navigate("/verse/1/1"); }
+  <Error />
 
-  let loadedCard = (e) =>{
-    console.log("e: "+e)
+  let loadedCard = (e) => {
     // setVerse(verse+1);
-    if(params.verse && params.verse == parseInt(e)+1){
-      console.log("verse: "+params.verse)
-      itemsRef3.current[parseInt(params.verse)-1].scrollIntoView({
+    if (params.verse && params.verse == parseInt(e) + 1) {
+      itemsRef3.current[parseInt(params.verse) - 1].scrollIntoView({
         behavior: 'smooth',
         block: 'center',
         inline: 'center'
-      }) ;
-      itemsRef2.current[parseInt(params.verse)-1].style.backgroundColor = '#ffb380';
-      itemsRef3.current[parseInt(params.verse)-1].style.backgroundColor = '#faebd7';
-      setTimeout(
-        () => {
-      itemsRef2.current[parseInt(params.verse)-1].style.backgroundColor = '';
-      itemsRef3.current[parseInt(params.verse)-1].style.backgroundColor = '';
-        }, 
-        3000
-      );
-
+      });
+      itemsRef2.current[parseInt(params.verse) - 1].style.backgroundColor = '#ffb380';
+      itemsRef3.current[parseInt(params.verse) - 1].style.backgroundColor = '#faebd7';
+      // setTimeout(
+      //   () => {
+      //     itemsRef2.current[parseInt(params.verse) - 1].style.backgroundColor = '';
+      //     itemsRef3.current[parseInt(params.verse) - 1].style.backgroundColor = '';
+      //   },
+      //   1500
+      // );
     }
   }
 
-  const copyToClipBoard = async (copyMe,index)=> {
+  const copyToClipBoard = async (copyMe, index) => {
     try {
-      await navigator.clipboard.writeText(copyMe+index+")");
-      itemsRef2.current["c-"+index].style.backgroundColor = '#90EE90';
-      itemsRef.current["c-"+index].src = '/assets/images/clipboard-check.svg';
+      await navigator.clipboard.writeText(copyMe + index + ")");
+      itemsRef2.current["c-" + index].style.backgroundColor = '#90EE90';
+      itemsRef.current["c-" + index].src = '/assets/images/clipboard-check.svg';
 
       setTimeout(
         () => {
-          itemsRef.current["c-"+index].src = '/assets/images/clipboard.svg';
-          itemsRef2.current["c-"+index].style.backgroundColor = '';
-        }, 
+          itemsRef.current["c-" + index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-" + index].style.backgroundColor = '';
+        },
         3000
       );
     } catch (err) {
-      itemsRef2.current["c-"+index].style.backgroundColor = '#FFCCCB';
-      itemsRef.current["c-"+index].src = '/assets/images/clipboard-x.svg';
+      itemsRef2.current["c-" + index].style.backgroundColor = '#FFCCCB';
+      itemsRef.current["c-" + index].src = '/assets/images/clipboard-x.svg';
       setTimeout(
         () => {
-          itemsRef.current["c-"+index].src = '/assets/images/clipboard.svg';
-          itemsRef2.current["c-"+index].style.backgroundColor = '';
-        }, 
+          itemsRef.current["c-" + index].src = '/assets/images/clipboard.svg';
+          itemsRef2.current["c-" + index].style.backgroundColor = '';
+        },
         3000
       );
     }
   };
 
-  async function speak(chap,index) {
+  async function speak(chap, index) {
+
     window.speechSynthesis.cancel();
 
     if (itemsRef.current[index].src.indexOf("stop.svg") != -1) { // contains play
       itemsRef.current[index].src = '/assets/images/play.svg';
+      itemsRef2.current[index].style.backgroundColor = '';
+      itemsRef3.current[index].style.backgroundColor = '';
       return;
     }
+
+    for (var i = 1; i < itemsRef3.current.length; i++) {
+      if (itemsRef.current[i]) {
+        itemsRef.current[i].src = '/assets/images/play.svg';
+        itemsRef2.current[i].style.backgroundColor = '';
+        itemsRef3.current[i].style.backgroundColor = '';
+      }
+    }
+
 
     let sentences = [];
     for (var i = index; i < JSON.parse(chap).length; i++) {
@@ -108,6 +117,18 @@ function Content() {
           inline: 'center'
         });
         mestext = event.utterance.text;
+      }
+
+      audio.onerror = (event) => {
+        window.speechSynthesis.cancel();
+        for (var i = 1; i < itemsRef3.current.length; i++) {
+          if (itemsRef.current[i]) {
+            itemsRef.current[i].src = '/assets/images/play.svg';
+            itemsRef2.current[i].style.backgroundColor = '';
+            itemsRef3.current[i].style.backgroundColor = '';
+          }
+        }
+        return;
       }
       audio.onend = (event) => {
         itemsRef.current[index + sentences.indexOf(mestext)].src = '/assets/images/play.svg';
@@ -137,22 +158,22 @@ function Content() {
   const getCacheData = async (cacheName, url) => {
     const cacheStorage = await caches.open(cacheName);
     const cachedResponse = await cacheStorage.match(url); // Returns a promise w/ matched cache
-    if(!cachedResponse || !cachedResponse.ok) {return false}
+    if (!cachedResponse || !cachedResponse.ok) { return false }
     // console.log(await cachedResponse);
     // console.log(await cachedResponse.json()); // prints json object with value of key matched
     return await cachedResponse.json();
-};
+  };
 
   function titlenav(response) {
     var r = response.data.filter(function (obj) {
       return (obj.n == params.book);
     });
- 
+
     setNavigation(
       <div className="row row-2 justify-content-center mt-4">
         {(() => {
           var tp = [];
-          
+
           if (params.chapter > 1 && params.chapter <= r[0].c) {
             tp.push(
               <div className="col-auto mr-auto "><Link to={`/verse/${params.book}/${parseInt(params.chapter) - 1}`} ><div className="arrowbutton"><a className="btn rounded-circle arrowbutton"><img className="" src="/assets/images/arrow-left.svg" alt="" /></a></div></Link></div>
@@ -169,7 +190,6 @@ function Content() {
     );
 
     setChaptername(r[0].bm);
-    console.log(chaptername)
 
     setTitle(
       <div className="text-center mb-2"><div><h3 className=""><span className="text-primary fw-bold"><Link className="text-decoration-none" to={`/verse/${r[0].n}/1`} >{r[0].bm}</Link></span> - അദ്ധ്യായം {params.chapter}</h3></div>
@@ -201,7 +221,7 @@ function Content() {
     });
 
     b = []; // clearing array first
-    let chap =JSON.stringify(r);
+    let chap = JSON.stringify(r);
     r.forEach((response, index) => {
       b.push(
         <div className="col mb-2 pushdata" id={`v-${response["v"]}`}>
@@ -211,18 +231,18 @@ function Content() {
                 <div className="col-auto"><span className="fw-bold"><Link className="text-decoration-none" to={`/verse/${params.book}/${params.chapter}/${response["v"]}`} >{response["v"]}.</Link></span></div>
                 <div className="col text-left">{response["t"]}</div>
                 <div className="col-auto text-right ml-auto my-auto">
-                {(() => {
-                  var td = [];
-                  if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                  {(() => {
+                    var td = [];
+                    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+                      td.push(
+                        <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap, index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" width="16px" height="16px" /></a></div>
+                      );
+                    }
                     td.push(
-                      <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current[index] = el} onClick={e => speak(chap,index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img ref={el => itemsRef.current[index] = el} src="/assets/images/play.svg" width="16px" height="16px" /></a></div>                          
+                      <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current["c-" + index] = el} onClick={e => copyToClipBoard(response["t"] + " (" + chaptername + " " + params.chapter + ":", index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img onLoad={(e) => { if (parseInt(params.verse) == index + 1) { loadedCard(index); } }} ref={el => itemsRef.current["c-" + index] = el} src="/assets/images/clipboard.svg" width="16px" height="16px" /></a></div>
                     );
-                  }
-                  td.push(
-                    <div style={{ "position": "relative", "margin-right": "-35px" }} className="arrowbutton"><a ref={el => itemsRef2.current["c-"+index] = el} onClick={e => copyToClipBoard(response["t"]+" ("+chaptername+" "+params.chapter+":",index)} className="btn btn-small rounded-circle fw-bold arrowbutton"><img onLoad={(e) => {if(parseInt(params.verse) == index+1){loadedCard(index);}}} ref={el => itemsRef.current["c-"+index] = el} src="/assets/images/clipboard.svg" width="16px" height="16px"/></a></div>
-                                   );
-                  return td;
-                })()}
+                    return td;
+                  })()}
                 </div>
               </div>
             </div>
@@ -231,7 +251,7 @@ function Content() {
       );
     });
     setCards(b);
-    
+
   }
 
   useEffect(() => {
@@ -244,9 +264,9 @@ function Content() {
 
     const titlenavi = async () => {
       const a = await getCacheData('content', url2);
-      if(a){
+      if (a) {
         titlenav(a);
-      }else{
+      } else {
         (async () => {
           await axios
             .get(url2)
@@ -265,9 +285,9 @@ function Content() {
 
     const biblecontents = async () => {
       const a = await getCacheData('content', url);
-      if(a){
+      if (a) {
         biblecontent(a);
-      }else{
+      } else {
         (async () => {
           await axios
             .get(url)
@@ -278,15 +298,14 @@ function Content() {
             .catch(function (error) {
               console.log(error);
             })
-            .then(function () { 
-              
+            .then(function () {
+
             });
         })();
       }
     };
     biblecontents();
-  }, [location,chaptername]);
-
+  }, [location, chaptername]);
 
   return (
     <section className="py-2 mb-5">
@@ -299,6 +318,10 @@ function Content() {
                   {title}
                   {cards}
                   {navigation}
+                  {(() => {
+    //return this.loadedCard(params.verse);
+    // onLoad={(e) => { if (parseInt(params.verse) == index + 1) { loadedCard(index); } }}
+  })()}
                 </div>
               </div>
             </section>
