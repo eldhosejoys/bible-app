@@ -105,6 +105,31 @@ function Index() {
     };
     loadindex();
 
+    let url2 = "/assets/json/bible.json";
+
+    const biblecontents = async () => {
+      const a = await getCacheData('content', url2);
+      if (a) {
+        // already in cache
+      } else {
+        (async () => {
+          await axios
+            .get(url)
+            .then(function (response) {
+              addDataIntoCache('content', url2, response);
+              // added to cache
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+            .then(function () {
+
+            });
+        })();
+      }
+    };
+    biblecontents();
+
   }, []);
 
   return (<>
