@@ -216,9 +216,15 @@ function Content() {
   }
 
   function biblecontent(response) {
+    
     var r = response.data.filter(function (obj) {
-      return (obj.b == params.book && obj.c == params.chapter);
+      return (obj.b == params.book && obj.c == params.chapter); 
     });
+
+    console.log(r.length)
+    if(r.length <= 0){
+
+    }
 
     b = []; // clearing array first
     let chap = JSON.stringify(r);
@@ -287,6 +293,7 @@ function Content() {
       const a = await getCacheData('content', url);
       if (a) {
         biblecontent(a);
+        console.log(a)
       } else {
         (async () => {
           await axios

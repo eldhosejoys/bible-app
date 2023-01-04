@@ -71,6 +71,7 @@ function Index() {
 
   }
 
+
   useEffect(() => {
     window.speechSynthesis.cancel();
     setCards(
@@ -79,12 +80,33 @@ function Index() {
       </div>
     );
 
-    let url = "/assets/json/title.json";
+    let url2 = "/assets/json/title.json";
 
     const loadindex = async () => {
-      const a = await getCacheData('content', url);
+      const a = await getCacheData('content', url2);
       if (a) {
         biblechapters(a);
+      }
+      else {
+        (async () => {
+          await axios
+            .get(url2)
+            .then(function (response) {
+              addDataIntoCache('content', url2, response);
+              biblechapters(response);
+            })
+            .catch(function (error) {
+              console.log(error);
+            })
+        })();
+      }
+    };
+    loadindex();
+
+    let url = "/assets/json/bible.json";
+    const loadindex2 = async () => {
+      const a = await getCacheData('content', url);
+      if (a) {
       }
       else {
         (async () => {
@@ -92,43 +114,14 @@ function Index() {
             .get(url)
             .then(function (response) {
               addDataIntoCache('content', url, response);
-              biblechapters(response);
             })
             .catch(function (error) {
               console.log(error);
             })
-            .then(function () {
-
-            });
         })();
       }
     };
-    loadindex();
-
-    let url2 = "/assets/json/bible.json";
-
-    const biblecontents = async () => {
-      const a = await getCacheData('content', url2);
-      if (a) {
-        // already in cache
-      } else {
-        (async () => {
-          await axios
-            .get(url)
-            .then(function (response) {
-              addDataIntoCache('content', url2, response);
-              // added to cache
-            })
-            .catch(function (error) {
-              console.log(error);
-            })
-            .then(function () {
-
-            });
-        })();
-      }
-    };
-    biblecontents();
+    loadindex2();
 
   }, []);
 
